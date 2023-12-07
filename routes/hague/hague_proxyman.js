@@ -14266,27 +14266,46 @@ var longRoute =
       ]
     };
 
+
+function formatDate(plainDateTime) {
+  const formatter = new Intl.DateTimeFormat('fr-CA', {
+    dateStyle: 'short',
+    timeStyle: 'long',
+    timeZone: 'UTC'
+  });
+
+  const { year, month, day, hour, minute, second, timeZone } = formatter
+    .formatToParts(plainDateTime)
+    .reduce((result, { type, value }) => {
+      if (type !== 'literal') {
+        result[type] = value;
+      }
+      return result;
+    }, {});
+
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
+}
+
+function addSecondsToDate(date, seconds) {
+  return new Date(Date.parse(date) + 1000*seconds);
+}
+
 /// This func is called if the Response Checkbox is Enabled. You can modify the Response Data here before it goes to the client
 /// e.g. Add/Update/Remove: headers, statusCode, comment, color and body (json, plain-text, base64 encoded string)
 ///
 async function onResponse(context, url, request, response) {
+  let now = new Date();
+
+  shortRoute.summary.departureTime = formatDate(now);
+  shortRoute.summary.arrivalTime = formatDate(addSecondsToDate(now, shortRoute.summary.travelTimeInSeconds));
+
   let trafficDelayInSeconds = 2*60*60;
-  let departureTime = new Date(Date.parse(new Date())).toISOString();
-  
-  shortRoute.summary.departureTime = departureTime;
-//   shortRoute.summary.arrivalTime = new Date(Date.parse(new Date()) + 1000*shortRoute.summary.travelTimeInSeconds).toISOString();
-  
   longRoute.summary.trafficDelayInSeconds = trafficDelayInSeconds;
   longRoute.summary.travelTimeInSeconds = longRoute.summary.travelTimeInSeconds + trafficDelayInSeconds;
-  longRoute.summary.departureTime = departureTime;
-  longRoute.summary.arrivalTime =
-    new Date(Date.parse(new Date()) + 1000*(longRoute.summary.travelTimeInSeconds)).toISOString();
+  longRoute.summary.departureTime = formatDate(now);
+  longRoute.summary.arrivalTime = formatDate(addSecondsToDate(now, longRoute.summary.travelTimeInSeconds));
 
-  if (request.method == "GET") {
-    response.body.routes = [shortRoute, longRoute];
-  } else if (request.method == "POST") {
-    response.body.routes = [longRoute, shortRoute];
-  }
+  response.body.routes = [longRoute, shortRoute];
 
   return response;
 }
