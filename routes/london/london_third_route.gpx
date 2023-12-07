@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.topografix.com/GPX/gpx_style/0/2 http://www.topografix.com/GPX/gpx_style/0/2/gpx_style.xsd" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpx_style="http://www.topografix.com/GPX/gpx_style/0/2" version="1.1" creator="https://gpx.studio">
+<metadata>
+    <name>new</name>
+    <author>
+        <name>gpx.studio</name>
+        <link href="https://gpx.studio"></link>
+    </author>
+</metadata>
+<trk>
+    <name>new</name>
+    <type>Cycling</type>
+    <trkseg>
+        <trkpt lat="51.5656613" lon="-0.2795505">
+        </trkpt>
+        <trkpt lat="51.5656078" lon="-0.2789953">
+        </trkpt>
+        <trkpt lat="51.5655863" lon="-0.2787298">
+        </trkpt>
+        <trkpt lat="51.5655541" lon="-0.2783489">
+        </trkpt>
+        <trkpt lat="51.565522" lon="-0.2779815">
+        </trkpt>
+
+
+        <trkpt lat="51.56556198731504" lon="-0.2770802801877449">
+        </trkpt>
+        <trkpt lat="51.56578207187154" lon="-0.2768549746525058">
+        </trkpt>
+        <trkpt lat="51.56591545593277" lon="-0.27669404212733506">
+        </trkpt>
+        <trkpt lat="51.566042170428496" lon="-0.2765867537772212">
+        </trkpt>
+        <trkpt lat="51.566282260083526" lon="-0.2764687365920959">
+        </trkpt>
+        <trkpt lat="51.566408973556996" lon="-0.2764043635820276">
+        </trkpt>
+        <trkpt lat="51.56655569397984" lon="-0.27632926173694794">
+        </trkpt>
+        <trkpt lat="51.566722421158346" lon="-0.27628634639690236">
+        </trkpt>
+        <trkpt lat="51.56693583105471" lon="-0.27612541387173156">
+        </trkpt>
+        <trkpt lat="51.567115894875585" lon="-0.2760717696966747">
+        </trkpt>
+        <trkpt lat="51.567322633938666" lon="-0.27594302367653806">
+        </trkpt>
+        <trkpt lat="51.567522703104636" lon="-0.2758250064914127">
+        </trkpt>
+        <trkpt lat="51.56764941312104" lon="-0.27571771814129886">
+        </trkpt>
+        <trkpt lat="51.56791616989602" lon="-0.27559970095617364">
+        </trkpt>
+        <trkpt lat="51.56820960054072" lon="-0.2755567856161281">
+        </trkpt>
+        <trkpt lat="51.56843634110546" lon="-0.27554605678111677">
+        </trkpt>
+        <trkpt lat="51.56854930014064" lon="-0.27552971317964303">
+        </trkpt>
+        <trkpt lat="51.568783503996386" lon="-0.2755540222238289">
+        </trkpt>
+        <trkpt lat="51.56891949277833" lon="-0.2756512584005723">
+        </trkpt>
+        <trkpt lat="51.56918391424545" lon="-0.275699876488944">
+        </trkpt>
+        <trkpt lat="51.569418114831954" lon="-0.2758214217098733">
+        </trkpt>
+        <trkpt lat="51.569720307354416" lon="-0.2759065033645238">
+        </trkpt>
+        <trkpt lat="51.56997716943768" lon="-0.2761495938063824">
+        </trkpt>
+        <trkpt lat="51.57016603767702" lon="-0.27663577469009953">
+        </trkpt>
+        <trkpt lat="51.570286912938386" lon="-0.27683024704358644">
+        </trkpt>
+        <trkpt lat="51.570536217149964" lon="-0.2773407369714894">
+        </trkpt>
+        <trkpt lat="51.570687309946145" lon="-0.27760813645753385">
+        </trkpt>
+        <trkpt lat="51.570921502804886" lon="-0.27774183619224385">
+        </trkpt>
+        <trkpt lat="51.571178358082626" lon="-0.2779241540236378">
+        </trkpt>
+        <trkpt lat="51.571404993887164" lon="-0.27809431733293877">
+        </trkpt>
+        <trkpt lat="51.5716618464331" lon="-0.2782887896864256">
+        </trkpt>
+        <trkpt lat="51.571775163271376" lon="-0.27837387134107616">
+        </trkpt>
+    </trkseg>
+</trk>
+</gpx>
