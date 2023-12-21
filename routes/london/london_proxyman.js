@@ -11872,6 +11872,24 @@ var longRoute =     {
 };
 
 
+const zip = (a, b) => Array.from(Array(Math.min(b.length, a.length)), (_, i) => [a[i], b[i]]);
+const tail = ([, ...t]) => t;
+
+Number.prototype.between = function(xs) { return xs[0] <= this && this < xs[1] };
+
+Array.prototype.dropWhile = function(cb) {
+    const n = this.length;
+    let i = 0;
+
+    for (; i < n; i++) {
+        if (!cb(this[i])) {
+            break;
+        }
+    }
+
+    return this.slice(i);
+}
+
 function formatDate(plainDateTime) {
   const formatter = new Intl.DateTimeFormat('fr-CA', {
     dateStyle: 'short',
@@ -11895,12 +11913,123 @@ function addSecondsToDate(date, seconds) {
   return new Date(Date.parse(date) + 1000*seconds);
 }
 
+function distance(point, lat, lon) {
+  let dy = point.latitude - lat;
+  let dx = point.longitude - lon;
+  return dx*dx + dy*dy;
+}
+
+function closestPointIndex(route, lat, lon) {
+  let ds = route.legs[0].points.map((p) => distance(p, lat, lon));
+  return ds.indexOf(Math.min(...ds));
+}
+
+function cutProgress(progress, index) {
+  const segments = zip(progress, tail(progress)).map(([a, b]) => {
+    return {
+      "pointIndices": [a.pointIndex, b.pointIndex],
+      "travelTimeInSeconds": b.travelTimeInSeconds - a.travelTimeInSeconds,
+      "distanceInMeters": b.distanceInMeters - a.distanceInMeters,
+    }
+  });
+  
+  const [matchSegment, ...notPassedSegments] = segments.dropWhile((s) => !index.between(s.pointIndices));
+  const [from, to] = matchSegment.pointIndices;
+  const total = to - from + 1;
+  const alreadyPassed = index - from + 1;
+  const passedRatio = alreadyPassed / total;
+  const restSegmentPart = {
+    "pointIndices": [index, to],
+    "travelTimeInSeconds": Math.round((1-passedRatio)*matchSegment.travelTimeInSeconds),
+    "distanceInMeters": Math.round((1-passedRatio)*matchSegment.distanceInMeters),
+  };
+  const segmentsWithFixedIndices = [restSegmentPart, ...notPassedSegments].map((s) => {
+    return {
+      "pointIndices": s.pointIndices.map((i) => i - index),
+      "travelTimeInSeconds": s.travelTimeInSeconds,
+      "distanceInMeters": s.distanceInMeters,
+    }
+  });
+  
+  return segmentsWithFixedIndices.reduce((acc, s) => {
+    const last = [...acc].pop();
+    const newElement = {
+      "pointIndex": s.pointIndices[1],
+      "travelTimeInSeconds": last.travelTimeInSeconds + s.travelTimeInSeconds,
+      "distanceInMeters": last.distanceInMeters + s.distanceInMeters,
+    }
+    return [...acc, newElement]
+  }, [{
+    "pointIndex": 0,
+    "travelTimeInSeconds": 0,
+    "distanceInMeters": 0,
+  }]);
+}
+
+function cutRoute(route, index) {
+  var newRoute = {};
+  
+  newRoute.progress = cutProgress(route.progress, index);
+  
+  newRoute.summary = { ...route.summary };
+  newRoute.summary.lengthInMeters = [...newRoute.progress].pop().distanceInMeters;
+  newRoute.summary.travelTimeInSeconds = [...newRoute.progress].pop().travelTimeInSeconds;
+  newRoute.legs = [{}];
+  newRoute.legs[0].summary = newRoute.summary;
+  newRoute.legs[0].points = route.legs[0].points.slice(index);
+  
+  newRoute.sections = route.sections.map((oldS) => {
+    let s = { ...oldS }
+    s.startPointIndex -= index;
+    s.endPointIndex -= index;
+    return s;
+  }).filter((s) => s.startPointIndex >= 0);
+  
+  const lengthDiff = route.summary.lengthInMeters - newRoute.summary.lengthInMeters;
+  const timeDiff = route.summary.travelTimeInSeconds - newRoute.summary.travelTimeInSeconds;
+  
+  newRoute.guidance = {};
+  newRoute.guidance.instructions = route.guidance.instructions.map((oldI) => {
+    const i = { ...oldI };
+    i.routeOffsetInMeters -= lengthDiff;
+    i.travelTimeInSeconds -= timeDiff;
+    i.pointIndex -= index;
+    
+    for (const [k, v] of Object.entries(i)) {
+      if (/^.*Announcement$/.test(k)) {
+        i[k].pointIndex -= index;
+      }
+    }
+
+    return i;
+  }).filter((i) => {
+    return i.routeOffsetInMeters >= 0
+      && i.travelTimeInSeconds >= 0
+      && i.pointIndex >= 0
+      && Object.entries(i).filter(([k,v]) => /^.*Announcement$/.test(k)).every(([k,v]) => i[k].pointIndex >= 0)
+  });
+  newRoute.guidance.instructionGroups = [ ...route.guidance.instructionGroups ];
+  return newRoute;
+}
+
+
 /// This func is called if the Response Checkbox is Enabled. You can modify the Response Data here before it goes to the client
 /// e.g. Add/Update/Remove: headers, statusCode, comment, color and body (json, plain-text, base64 encoded string)
 ///
 async function onResponse(context, url, request, response) {
   let now = new Date();
 
+  if (request.method == "GET") {
+  } else if (request.method == "POST") {
+    let coords = new URL(url).pathname.match(/\/((\d|\.)*)\,((\d|\.)*):((\d|\.)*)\,((\d|\.)*)\//);
+    let startLat = coords[1];
+    let startLon = coords[3];
+    let shortClosestPointIndex = closestPointIndex(shortRoute, startLat, startLon);
+    let cutShortRoute = cutRoute(shortRoute, shortClosestPointIndex);
+    shortRoute = cutShortRoute;
+  }
+
+  
   shortRoute.summary.departureTime = formatDate(now);
   shortRoute.summary.arrivalTime = formatDate(addSecondsToDate(now, shortRoute.summary.travelTimeInSeconds));
 
@@ -11911,6 +12040,7 @@ async function onResponse(context, url, request, response) {
   longRoute.summary.arrivalTime = formatDate(addSecondsToDate(now, longRoute.summary.travelTimeInSeconds));
 
   response.body.routes = [longRoute, shortRoute];
+
 
   return response;
 }
