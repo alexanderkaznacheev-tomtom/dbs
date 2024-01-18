@@ -5966,32 +5966,6 @@ var shortRoute =
           "distanceInMeters": 30
         }
       }
-    ],
-    "instructionGroups": [
-      {
-        "firstInstructionIndex": 0,
-        "lastInstructionIndex": 5,
-        "groupMessage": "Leave from <street>Nassaukade</street>. Take the <roadNumber>s100</roadNumber> then follow <street>Overtoom</street>, <street>Surinamestraat</street>/<roadNumber>s106</roadNumber>. Continue on <roadNumber>A10</roadNumber>/<roadNumber>E22</roadNumber> toward <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 4453
-      },
-      {
-        "firstInstructionIndex": 6,
-        "lastInstructionIndex": 12,
-        "groupMessage": "Take the <roadNumber>A4</roadNumber>/<roadNumber>E19</roadNumber> toward <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 43593
-      },
-      {
-        "firstInstructionIndex": 13,
-        "lastInstructionIndex": 17,
-        "groupMessage": "Take the <roadNumber>A12</roadNumber> toward <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 5909
-      },
-      {
-        "firstInstructionIndex": 18,
-        "lastInstructionIndex": 23,
-        "groupMessage": "Take the <street>Prins Clauslaan</street>, <street>Bezuidenhoutseweg</street>, <street>Korte Voorhout</street> toward <signpostText>route</signpostText>, <signpostText>Scheveningen</signpostText>. Continue to your destination at <street>Lange Vijverberg</street>",
-        "groupLengthInMeters": 2226
-      }
     ]
   },
   "progress": [
@@ -14054,26 +14028,6 @@ var longRoute =
               "maneuver": "ARRIVE",
               "distanceInMeters": 30
             }
-          }
-        ],
-        "instructionGroups": [
-          {
-            "firstInstructionIndex": 0,
-            "lastInstructionIndex": 8,
-            "groupMessage": "Leave from <street>Nassaukade</street>. Take the <roadNumber>s100</roadNumber> then take the <street>Amsteldijk</street>, <street>Nieuwe Utrechtseweg</street>/<roadNumber>s110</roadNumber> toward <signpostText>Utrecht</signpostText>. Follow <street>Nieuwe Utrechtseweg</street>/<roadNumber>A2</roadNumber>/<roadNumber>E35</roadNumber> toward <signpostText>Utrecht</signpostText>, <signpostText>Holendrecht</signpostText>, <signpostText>RING-Zuid</signpostText>, <signpostText>Den Haag</signpostText>",
-            "groupLengthInMeters": 37489
-          },
-          {
-            "firstInstructionIndex": 9,
-            "lastInstructionIndex": 15,
-            "groupMessage": "Take the <roadNumber>A12</roadNumber>/<roadNumber>E30</roadNumber>/<roadNumber>E25</roadNumber> toward <signpostText>Den Haag</signpostText>, <signpostText>Bleiswijk</signpostText>",
-            "groupLengthInMeters": 55131
-          },
-          {
-            "firstInstructionIndex": 16,
-            "lastInstructionIndex": 21,
-            "groupMessage": "Take the <street>Prins Clauslaan</street>, <street>Bezuidenhoutseweg</street>, <street>Korte Voorhout</street> toward <signpostText>route</signpostText>, <signpostText>Scheveningen</signpostText>. Continue to your destination at <street>Lange Vijverberg</street>",
-            "groupLengthInMeters": 2226
           }
         ]
       },

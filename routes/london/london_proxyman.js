@@ -5142,62 +5142,6 @@ var shortRoute =     {
           }
         ]
       }
-    ],
-    "instructionGroups": [
-      {
-        "firstInstructionIndex": 0,
-        "lastInstructionIndex": 3,
-        "groupMessage": "Leave from <street>Forty Avenue</street>. Take the <street>Blackbird Hill</street>/<roadNumber>A4088</roadNumber>",
-        "groupLengthInMeters": 2384
-      },
-      {
-        "firstInstructionIndex": 4,
-        "lastInstructionIndex": 5,
-        "groupMessage": "Take the <street>Neasden Lane</street>/<roadNumber>B453</roadNumber>",
-        "groupLengthInMeters": 1269
-      },
-      {
-        "firstInstructionIndex": 6,
-        "lastInstructionIndex": 8,
-        "groupMessage": "Take the <street>High Road</street>/<roadNumber>A407</roadNumber>",
-        "groupLengthInMeters": 1513
-      },
-      {
-        "firstInstructionIndex": 9,
-        "lastInstructionIndex": 11,
-        "groupMessage": "Take the <street>Maida Vale</street>/<roadNumber>A5</roadNumber>",
-        "groupLengthInMeters": 6680
-      },
-      {
-        "firstInstructionIndex": 12,
-        "lastInstructionIndex": 13,
-        "groupMessage": "Take the <street>Park Lane</street>/<roadNumber>A4202</roadNumber>",
-        "groupLengthInMeters": 1390
-      },
-      {
-        "firstInstructionIndex": 14,
-        "lastInstructionIndex": 15,
-        "groupMessage": "Take the <street>Duke of Wellington Place</street>",
-        "groupLengthInMeters": 760
-      },
-      {
-        "firstInstructionIndex": 16,
-        "lastInstructionIndex": 18,
-        "groupMessage": "Take the <street>Lower Grosvenor Place</street>, <street>Bressenden Place</street>/<roadNumber>A302</roadNumber>",
-        "groupLengthInMeters": 900
-      },
-      {
-        "firstInstructionIndex": 19,
-        "lastInstructionIndex": 22,
-        "groupMessage": "Take the <street>Artillery Row</street>, <street>Greycoat Place</street>/<roadNumber>B323</roadNumber>",
-        "groupLengthInMeters": 841
-      },
-      {
-        "firstInstructionIndex": 23,
-        "lastInstructionIndex": 24,
-        "groupMessage": "Take the <street>Abingdon Street</street>/<roadNumber>A3212</roadNumber>. Continue to your destination at <street>Saint Margaret Street</street>",
-        "groupLengthInMeters": 354
-      }
     ]
   },
   "progress": [
@@ -11390,50 +11334,6 @@ var longRoute =     {
             "shieldContent": "A3212"
           }
         ]
-      }
-    ],
-    "instructionGroups": [
-      {
-        "firstInstructionIndex": 0,
-        "lastInstructionIndex": 3,
-        "groupMessage": "Leave from <street>Forty Avenue</street>. Take the <roadNumber>A4088</roadNumber> and follow <street>Bridge Road</street>/<roadNumber>A4089</roadNumber>. Then take the <street>Empire Way</street>/<roadNumber>B4565</roadNumber>",
-        "groupLengthInMeters": 3134
-      },
-      {
-        "firstInstructionIndex": 4,
-        "lastInstructionIndex": 7,
-        "groupMessage": "Take the <street>North Circular Road</street>/<roadNumber>A406</roadNumber>",
-        "groupLengthInMeters": 1526
-      },
-      {
-        "firstInstructionIndex": 8,
-        "lastInstructionIndex": 10,
-        "groupMessage": "Take the <street>Whitby Avenue</street>, <street>Rainsford Road</street>",
-        "groupLengthInMeters": 778
-      },
-      {
-        "firstInstructionIndex": 11,
-        "lastInstructionIndex": 13,
-        "groupMessage": "Take the <street>Western Avenue</street>/<roadNumber>A40</roadNumber>",
-        "groupLengthInMeters": 5369
-      },
-      {
-        "firstInstructionIndex": 14,
-        "lastInstructionIndex": 20,
-        "groupMessage": "Take the <street>West Cross Route</street>, <street>Holland Road</street>, <street>Addison Road</street>/<roadNumber>A3220</roadNumber> toward <signpostText>Westminster</signpostText> and continue to <street>Kensington High Street</street>/<roadNumber>A315</roadNumber>",
-        "groupLengthInMeters": 3360
-      },
-      {
-        "firstInstructionIndex": 21,
-        "lastInstructionIndex": 23,
-        "groupMessage": "Follow <street>Earl's Court Road</street>/<roadNumber>B316</roadNumber> then take the <street>Earl's Court Road</street>, <street>Edith Grove</street>/<roadNumber>A3220</roadNumber>/<roadNumber>E30</roadNumber>",
-        "groupLengthInMeters": 7114
-      },
-      {
-        "firstInstructionIndex": 24,
-        "lastInstructionIndex": 25,
-        "groupMessage": "Take the <street>Millbank</street>/<roadNumber>A3212</roadNumber>. Continue to your destination at <street>Saint Margaret Street</street>",
-        "groupLengthInMeters": 640
       }
     ]
   },

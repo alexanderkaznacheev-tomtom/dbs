@@ -6082,32 +6082,6 @@ var shortRoute = {
           "distanceInMeters": 30
         }
       }
-    ],
-    "instructionGroups": [
-      {
-        "firstInstructionIndex": 0,
-        "lastInstructionIndex": 5,
-        "groupMessage": "Leave from <street>Nassaukade</street>. Take the <roadNumber>s100</roadNumber> then follow <street>Jan van Galenstraat</street>/<roadNumber>s105</roadNumber>. Continue on <roadNumber>A10</roadNumber>/<roadNumber>E22</roadNumber> toward <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 6548
-      },
-      {
-        "firstInstructionIndex": 6,
-        "lastInstructionIndex": 12,
-        "groupMessage": "Take the <roadNumber>A4</roadNumber>/<roadNumber>E19</roadNumber> toward <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 43593
-      },
-      {
-        "firstInstructionIndex": 13,
-        "lastInstructionIndex": 17,
-        "groupMessage": "Take the <roadNumber>A12</roadNumber> toward <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 5909
-      },
-      {
-        "firstInstructionIndex": 18,
-        "lastInstructionIndex": 23,
-        "groupMessage": "Take the <street>Prins Clauslaan</street>, <street>Bezuidenhoutseweg</street>, <street>Korte Voorhout</street> toward <signpostText>route</signpostText>, <signpostText>Scheveningen</signpostText>. Continue to your destination at <street>Lange Vijverberg</street>",
-        "groupLengthInMeters": 2226
-      }
     ]
   },
   "progress": [
@@ -12082,38 +12056,6 @@ var longRoute = {
           "maneuver": "ARRIVE",
           "distanceInMeters": 30
         }
-      }
-    ],
-    "instructionGroups": [
-      {
-        "firstInstructionIndex": 0,
-        "lastInstructionIndex": 5,
-        "groupMessage": "Leave from <street>Nassaukade</street>. Take the <roadNumber>s100</roadNumber> then follow <street>Jan van Galenstraat</street>/<roadNumber>s105</roadNumber>. Continue on <roadNumber>A10</roadNumber>/<roadNumber>E22</roadNumber> toward <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 6548
-      },
-      {
-        "firstInstructionIndex": 6,
-        "lastInstructionIndex": 10,
-        "groupMessage": "Take the <roadNumber>A4</roadNumber>/<roadNumber>E19</roadNumber> toward <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 18396
-      },
-      {
-        "firstInstructionIndex": 11,
-        "lastInstructionIndex": 14,
-        "groupMessage": "Take the <street>Rijksweg A44</street>/<roadNumber>A44</roadNumber> toward <signpostText>Den Haag-Centrum</signpostText>, <signpostText>Den Haag</signpostText>",
-        "groupLengthInMeters": 21369
-      },
-      {
-        "firstInstructionIndex": 15,
-        "lastInstructionIndex": 16,
-        "groupMessage": "Take the <street>Rijksstraatweg</street>/<roadNumber>N44</roadNumber> toward <signpostText>Den Haag</signpostText>, <signpostText>Scheveningen-Haven</signpostText>",
-        "groupLengthInMeters": 9099
-      },
-      {
-        "firstInstructionIndex": 17,
-        "lastInstructionIndex": 20,
-        "groupMessage": "Take the <street>Koningskade</street>/<roadNumber>s100</roadNumber>. Continue to your destination at <street>Lange Vijverberg</street>",
-        "groupLengthInMeters": 1153
       }
     ]
   },

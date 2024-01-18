@@ -2155,44 +2155,6 @@ var shortRoute =     {
               "distanceInMeters": 30
             }
           }
-        ],
-        "instructionGroups": [
-          {
-            "firstInstructionIndex": 0,
-            "lastInstructionIndex": 4,
-            "groupMessage": "Leave from <street>Templariuszy</street>. Take the <street>Główna</street>, <street>Pszenna</street>",
-            "groupLengthInMeters": 3457
-          },
-          {
-            "firstInstructionIndex": 5,
-            "lastInstructionIndex": 7,
-            "groupMessage": "Take the <street>Ołtaszyńska</street>, <street>Wojszycka</street>, <street>Wyścigowa</street>",
-            "groupLengthInMeters": 3120
-          },
-          {
-            "firstInstructionIndex": 8,
-            "lastInstructionIndex": 9,
-            "groupMessage": "Take the <street>Aleja Wiśniowa</street>/<roadNumber>94</roadNumber>",
-            "groupLengthInMeters": 1067
-          },
-          {
-            "firstInstructionIndex": 10,
-            "lastInstructionIndex": 11,
-            "groupMessage": "Take the <street>Powstańców Śląskich</street>",
-            "groupLengthInMeters": 1364
-          },
-          {
-            "firstInstructionIndex": 12,
-            "lastInstructionIndex": 14,
-            "groupMessage": "Take the <street>Swobodna</street>, <street>Tadeusza Zielińskiego</street>, <street>Marszałka Józefa Piłsudskiego</street>",
-            "groupLengthInMeters": 1698
-          },
-          {
-            "firstInstructionIndex": 15,
-            "lastInstructionIndex": 16,
-            "groupMessage": "Take the <street>Plac Jana Pawła II</street>. Continue to your destination at <street>Ruska</street>",
-            "groupLengthInMeters": 294
-          }
         ]
       },
       "progress": [
@@ -5885,44 +5847,6 @@ var longRoute =    {
           "maneuver": "ARRIVE",
           "distanceInMeters": 30
         }
-      }
-    ],
-    "instructionGroups": [
-      {
-        "firstInstructionIndex": 0,
-        "lastInstructionIndex": 4,
-        "groupMessage": "Leave from <street>Templariuszy</street>. Take the <street>Główna</street>, <street>Przystankowa</street>",
-        "groupLengthInMeters": 1853
-      },
-      {
-        "firstInstructionIndex": 5,
-        "lastInstructionIndex": 7,
-        "groupMessage": "Take the <roadNumber>A4</roadNumber>/<roadNumber>E40</roadNumber> toward <signpostText>Wrocław</signpostText>",
-        "groupLengthInMeters": 3932
-      },
-      {
-        "firstInstructionIndex": 8,
-        "lastInstructionIndex": 11,
-        "groupMessage": "Take the <roadNumber>A8</roadNumber>/<roadNumber>E67</roadNumber> toward <signpostText>Wrocław</signpostText>, <signpostText>Warszawa</signpostText>",
-        "groupLengthInMeters": 7005
-      },
-      {
-        "firstInstructionIndex": 12,
-        "lastInstructionIndex": 13,
-        "groupMessage": "Take the <street>Graniczna</street> toward <signpostText>Wrocław</signpostText>",
-        "groupLengthInMeters": 1748
-      },
-      {
-        "firstInstructionIndex": 14,
-        "lastInstructionIndex": 15,
-        "groupMessage": "Take the <street>Strzegomska</street>",
-        "groupLengthInMeters": 4365
-      },
-      {
-        "firstInstructionIndex": 16,
-        "lastInstructionIndex": 18,
-        "groupMessage": "Take the <street>Plac Strzegomski</street>, <street>Legnicka</street>. Continue to your destination at <street>Ruska</street>",
-        "groupLengthInMeters": 1477
       }
     ]
   },
