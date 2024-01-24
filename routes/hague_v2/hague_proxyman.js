@@ -29862,12 +29862,12 @@ async function onResponse(context, url, request, response) {
 
   if (request.method == "GET") {
   } else if (request.method == "POST") {
-    let coords = new URL(url).pathname.match(/\/((\d|\.)*)\,((\d|\.)*):((\d|\.)*)\,((\d|\.)*)\//);
-    let startLat = coords[1];
-    let startLon = coords[3];
-    let shortClosestPointIndex = closestPointIndex(shortRoute, startLat, startLon);
-    let cutShortRoute = cutRoute(shortRoute, shortClosestPointIndex);
-    shortRoute = cutShortRoute;
+    // let coords = new URL(url).pathname.match(/\/((\d|\.)*)\,((\d|\.)*):((\d|\.)*)\,((\d|\.)*)\//);
+    // let startLat = coords[1];
+    // let startLon = coords[3];
+    // let shortClosestPointIndex = closestPointIndex(shortRoute, startLat, startLon);
+    // let cutShortRoute = cutRoute(shortRoute, shortClosestPointIndex);
+    // shortRoute = cutShortRoute;
   }
 
   
