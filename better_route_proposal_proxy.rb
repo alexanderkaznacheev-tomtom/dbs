@@ -13,10 +13,10 @@ TARGET_BASE = "https://api.tomtom.com"
 # Global variable for additional processing mode.
 # Possible values: :mode1, :mode2, :mode3, :mode4, :mode5
 # Modes meaning:
-#  • mode1: Adds the first alternative (index 1) and sets a delay of 1 hour (3600 sec)
-#  • mode2: Adds the first alternative (index 1) and sets a delay of 3 minutes (180 sec)
-#  • mode3: Adds the second alternative (index 2) and sets a delay of 1.5 hours (5400 sec)
-#  • mode4: Adds the second alternative (index 2) and sets a delay of 2 minutes (120 sec)
+#  • mode1: Adds the first alternative (index 1) and sets a delay of 1 hour (3610 sec)
+#  • mode2: Adds the first alternative (index 1) and sets a delay of 3 minutes (190 sec)
+#  • mode3: Adds the second alternative (index 2) and sets a delay of 1.5 hours (5410 sec)
+#  • mode4: Adds the second alternative (index 2) and sets a delay of 4 minutes (250 sec)
 #  • mode5: Returns the response unmodified
 $processing_mode = :mode1
 
@@ -88,9 +88,11 @@ server.mount_proc '/' do |req, res|
   # Perform the request to the destination server
   response_forward = http.request(request_forward)
 
-  # If the mode is not mode5, the request is POST, and the URL contains "calculateRoute",
-  # perform an additional GET request and modify the JSON response.
-  if $processing_mode != :mode5 && req.request_method == "POST" && req.unparsed_uri.include?("calculateRoute")
+  # If the mode is not mode5, the request is POST, the URL contains "calculateRoute",
+  # and the maxAlternatives parameter is not set to 0, perform an additional GET request
+  # and modify the JSON response accordingly.
+  if $processing_mode != :mode5 && req.request_method == "POST" &&
+     req.unparsed_uri.include?("calculateRoute") && !req.unparsed_uri.include?("maxAlternatives=0")
     cleaned_url = clean_url(target_url)
     extra_uri = URI.parse(cleaned_url)
     extra_http = Net::HTTP.new(extra_uri.host, extra_uri.port)
@@ -114,10 +116,10 @@ server.mount_proc '/' do |req, res|
       json_get  = extra_response ? JSON.parse(ungzed_response_body(extra_response)) : nil
 
       delay = case $processing_mode
-              when :mode1 then 3600   # 1 hour
-              when :mode2 then 180    # 3 minutes
-              when :mode3 then 5400   # 1.5 hours
-              when :mode4 then 120    # 2 minutes
+              when :mode1 then 3610   # 1 hour
+              when :mode2 then 190    # 3 minutes
+              when :mode3 then 5410   # 1.5 hours
+              when :mode4 then 250    # 4 minutes
               end
 
       if json_post["routes"] && json_post["routes"].any?
