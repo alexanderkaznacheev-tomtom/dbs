@@ -10,13 +10,16 @@ require 'time'
 PORT = 8000
 TARGET_BASE = "https://api.tomtom.com"
 
+# 1 2 4
+# 1 2 4 5 4
+
 # Global variable for additional processing mode.
 # Possible values: :mode1, :mode2, :mode3, :mode4, :mode5
 # Modes meaning:
-#  • mode1: Adds the first alternative (index 1) and sets a delay of 1 hour (3610 sec)
-#  • mode2: Adds the first alternative (index 1) and sets a delay of 3 minutes (190 sec)
-#  • mode3: Adds the second alternative (index 2) and sets a delay of 1.5 hours (5410 sec)
-#  • mode4: Adds the second alternative (index 2) and sets a delay of 4 minutes (250 sec)
+#  • mode1: Adds the first alternative (index 1) and sets a delay of 1 hour (3600 sec)
+#  • mode2: Adds the first alternative (index 1) and sets a delay of 2 minutes (120 sec)
+#  • mode3: Adds the second alternative (index 2) and sets a delay of 1.5 hours (5400 sec)
+#  • mode4: Adds the second alternative (index 2) and sets a delay of 4 minutes (240 sec)
 #  • mode5: Returns the response unmodified
 $processing_mode = :mode1
 
@@ -116,11 +119,12 @@ server.mount_proc '/' do |req, res|
       json_get  = extra_response ? JSON.parse(ungzed_response_body(extra_response)) : nil
 
       delay = case $processing_mode
-              when :mode1 then 3610   # 1 hour
-              when :mode2 then 190    # 3 minutes
-              when :mode3 then 5410   # 1.5 hours
-              when :mode4 then 250    # 4 minutes
+              when :mode1 then 3600   # 1 hour
+              when :mode2 then 120    # 2 minutes
+              when :mode3 then 5400   # 1.5 hours
+              when :mode4 then 240    # 4 minutes
               end
+      delay += 30
 
       if json_post["routes"] && json_post["routes"].any?
         first_route = json_post["routes"][0]
@@ -214,7 +218,7 @@ Thread.new do
   puts help_msg
   puts "[Current mode: #{$processing_mode}]"
   loop do
-    print "Enter command: "
+    puts "Enter command:"
     input = gets.strip.downcase rescue nil
     if input.nil?
       sleep 1
