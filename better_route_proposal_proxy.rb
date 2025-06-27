@@ -61,7 +61,13 @@ def ungzed_response_body(response)
   end
 end
 
-server = WEBrick::HTTPServer.new(Port: PORT)
+# server = WEBrick::HTTPServer.new(Port: PORT)
+server = WEBrick::HTTPServer.new(
+  Port: PORT,
+  Logger: WEBrick::Log.new(File::NULL, WEBrick::Log::FATAL),
+  AccessLog: []
+)
+
 
 server.mount_proc '/' do |req, res|
   # Construct the URL for the outgoing request
@@ -88,14 +94,20 @@ server.mount_proc '/' do |req, res|
   # Transfer request body (if present)
   request_forward.body = req.body if req.body
 
-  # Perform the request to the destination server
-  response_forward = http.request(request_forward)
-
-  # If the mode is not mode5, the request is POST, the URL contains "calculateRoute",
+  # If the mode is not mode5, the request replanning, the URL contains "calculateRoute",
   # and the maxAlternatives parameter is not set to 0, perform an additional GET request
   # and modify the JSON response accordingly.
-  if $processing_mode != :mode5 && req.request_method == "POST" &&
-     req.unparsed_uri.include?("calculateRoute") && !req.unparsed_uri.include?("maxAlternatives=0")
+  isReplanning = req.unparsed_uri.include?("alternativeType") && !req.unparsed_uri.include?("maxAlternatives=0")
+  shouldProcess = $processing_mode != :mode5 && req.unparsed_uri.include?("calculateRoute") && isReplanning
+
+
+  # Perform the request to the destination server
+  if shouldProcess then print "=> #{req.request_method}..." end
+  response_forward = http.request(request_forward)
+  if shouldProcess then print "#{response_forward.code}" end
+  
+
+  if shouldProcess
     cleaned_url = clean_url(target_url)
     extra_uri = URI.parse(cleaned_url)
     extra_http = Net::HTTP.new(extra_uri.host, extra_uri.port)
@@ -107,10 +119,12 @@ server.mount_proc '/' do |req, res|
     end
 
     begin
+      print ", GET..."
       extra_response = extra_http.request(extra_request)
-      puts "\n### Extra GET request to #{cleaned_url} returned status code #{extra_response.code} ###\n\n"
+      # puts "\n### Extra GET request to #{cleaned_url} returned status code #{extra_response.code} ###\n\n"
+      print "#{extra_response.code}"
     rescue => e
-      puts "Extra GET request failed: #{e.message}"
+      puts "Failed: #{e.message}"
       extra_response = nil
     end
 
@@ -205,6 +219,9 @@ server.mount_proc '/' do |req, res|
   end
 
   res.body = response_forward.body
+
+  puts ""
+
 end
 
 # Thread for processing console commands to switch additional processing modes.
@@ -218,7 +235,7 @@ Thread.new do
   puts help_msg
   puts "[Current mode: #{$processing_mode}]"
   loop do
-    puts "Enter command:"
+    puts "Enter command: "
     input = gets.strip.downcase rescue nil
     if input.nil?
       sleep 1
