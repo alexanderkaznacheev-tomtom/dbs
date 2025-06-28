@@ -227,6 +227,22 @@ server.mount_proc '/' do |req, res|
   else
     response_forward = http.request(request_forward)
     puts "=> (unmodified)POST...#{response_forward.code}"
+    
+    # Декодируем и выводим тело ответа если нужно
+    if response_forward.code == '200' && 
+       response_forward['content-type']&.include?('application/json')
+      
+      body = ungzed_response_body(response_forward)
+      
+      begin
+        json_body = JSON.parse(body)
+        pretty_json = JSON.pretty_generate(json_body)
+        puts "Response Body:"
+        puts pretty_json
+      rescue => e
+        puts "Failed to parse JSON: #{e}"
+      end
+    end
   end
 
   res.status = response_forward.code.to_i
