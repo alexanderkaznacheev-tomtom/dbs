@@ -6,47 +6,65 @@ require 'zlib'
 require 'stringio'
 require 'json'
 require 'time'
+require 'cgi'
 
 PORT = 8000
 TARGET_BASE = "https://api.tomtom.com"
 
-# 1 2 4
-# 1 2 4 5 4
-
-# Global variable for additional processing mode.
-# Possible values: :mode1, :mode2, :mode3, :mode4, :mode5
-# Modes meaning:
-#  • mode1: Adds the first alternative (index 1) and sets a delay of 1 hour (3600 sec)
-#  • mode2: Adds the first alternative (index 1) and sets a delay of 2 minutes (120 sec)
-#  • mode3: Adds the second alternative (index 2) and sets a delay of 1.5 hours (5400 sec)
-#  • mode4: Adds the second alternative (index 2) and sets a delay of 4 minutes (240 sec)
-#  • mode5: Returns the response unmodified
 $processing_mode = :mode1
 
 def clean_url(original_url)
   uri = URI.parse(original_url)
   if uri.query
-    new_params = uri.query.split('&').reject do |param|
-      param.start_with?("alternativeType=") ||
-      param.start_with?("minDeviationTime=") ||
-      param.start_with?("reconstructionMode=") ||
-      param.start_with?("supportingPointIndexOfOrigin=")
-    end.map do |param|
-      param == "maxAlternatives=1" ? "maxAlternatives=2" : param
-    end
-    uri.query = new_params.empty? ? nil : new_params.join('&')
+    params = CGI.parse(uri.query)
+    
+    # Удаляем ненужные параметры
+    params.delete('alternativeType')
+    params.delete('minDeviationTime')
+    params.delete('reconstructionMode')
+    params.delete('supportingPointIndexOfOrigin')
+    
+    # Запрашиваем 2 альтернативных маршрута (итого 3 маршрута)
+    params['maxAlternatives'] = ['2']
+    
+    # Перестраиваем строку запроса
+    uri.query = URI.encode_www_form(params)
   end
   uri.to_s
 end
 
-def pretty_print_request(req)
-  output = "#{req.method} #{req.path} HTTP/1.1\n"
-  req.each_header do |key, value|
-    output << "#{key}: #{value}\n"
+def modify_route_summary(route, delay)
+  if route["summary"]
+    summary = route["summary"]
+    summary["travelTimeInSeconds"] = summary["travelTimeInSeconds"].to_i + delay
+    summary["trafficDelayInSeconds"] = summary["trafficDelayInSeconds"].to_i + delay
+    if summary["arrivalTime"]
+      begin
+        dt = Time.iso8601(summary["arrivalTime"])
+        dt += delay
+        summary["arrivalTime"] = dt.iso8601
+      rescue
+      end
+    end
   end
-  output << "\n"
-  output << (req.body.nil? ? "" : req.body)
-  output
+
+  if route["legs"]
+    route["legs"].each do |leg|
+      if leg["summary"]
+        leg_summary = leg["summary"]
+        leg_summary["travelTimeInSeconds"] = leg_summary["travelTimeInSeconds"].to_i + delay
+        leg_summary["trafficDelayInSeconds"] = leg_summary["trafficDelayInSeconds"].to_i + delay
+        if leg_summary["arrivalTime"]
+          begin
+            dt = Time.iso8601(leg_summary["arrivalTime"])
+            dt += delay
+            leg_summary["arrivalTime"] = dt.iso8601
+          rescue
+          end
+        end
+      end
+    end
+  end
 end
 
 def ungzed_response_body(response)
@@ -61,28 +79,22 @@ def ungzed_response_body(response)
   end
 end
 
-# server = WEBrick::HTTPServer.new(Port: PORT)
 server = WEBrick::HTTPServer.new(
   Port: PORT,
   Logger: WEBrick::Log.new(File::NULL, WEBrick::Log::FATAL),
   AccessLog: []
 )
 
-
 server.mount_proc '/' do |req, res|
-  # Construct the URL for the outgoing request
   target_url = "#{TARGET_BASE}#{req.unparsed_uri}"
   target_uri = URI(target_url)
 
-  # Set up HTTPS connection to the destination server
   http = Net::HTTP.new(target_uri.host, target_uri.port)
   http.use_ssl = (target_uri.scheme == "https")
 
-  # Select the HTTP class (GET, POST, PUT, DELETE, etc.) based on the request method
   http_class = Net::HTTP.const_get(req.request_method.capitalize)
   request_forward = http_class.new(target_uri.request_uri)
 
-  # Transfer request headers
   req.header.each do |key, values|
     if key.downcase == "host"
       request_forward[key] = target_uri.host
@@ -91,125 +103,107 @@ server.mount_proc '/' do |req, res|
     end
   end
 
-  # Transfer request body (if present)
   request_forward.body = req.body if req.body
 
-  # If the mode is not mode5, the request replanning, the URL contains "calculateRoute",
-  # and the maxAlternatives parameter is not set to 0, perform an additional GET request
-  # and modify the JSON response accordingly.
   isReplanning = req.unparsed_uri.include?("alternativeType") && !req.unparsed_uri.include?("maxAlternatives=0")
   shouldProcess = $processing_mode != :mode5 && req.unparsed_uri.include?("calculateRoute") && isReplanning
 
-
-  # Perform the request to the destination server
-  if shouldProcess then print "=> #{req.request_method}..." end
-  response_forward = http.request(request_forward)
-  if shouldProcess then print "#{response_forward.code}" end
-  
-
   if shouldProcess
     cleaned_url = clean_url(target_url)
-    extra_uri = URI.parse(cleaned_url)
-    extra_http = Net::HTTP.new(extra_uri.host, extra_uri.port)
-    extra_http.use_ssl = (extra_uri.scheme == "https")
-    extra_request = Net::HTTP::Get.new(extra_uri.request_uri)
-    request_forward.each_header do |key, value|
-      next if ["content-length", "content-type"].include?(key.downcase)
-      extra_request[key] = value
+    cleaned_uri = URI(cleaned_url)
+
+    http = Net::HTTP.new(cleaned_uri.host, cleaned_uri.port)
+    http.use_ssl = (cleaned_uri.scheme == "https")
+    request_forward = Net::HTTP::Post.new(cleaned_uri.request_uri)
+
+    req.header.each do |key, values|
+      next if key.downcase == "content-length"
+      if key.downcase == "host"
+        request_forward[key] = cleaned_uri.host
+      else
+        request_forward[key] = values.join(", ")
+      end
     end
 
-    begin
-      print ", GET..."
-      extra_response = extra_http.request(extra_request)
-      # puts "\n### Extra GET request to #{cleaned_url} returned status code #{extra_response.code} ###\n\n"
-      print "#{extra_response.code}"
-    rescue => e
-      puts "Failed: #{e.message}"
-      extra_response = nil
+    # Модифицируем тело запроса
+    if req['content-type']&.include?('application/json') && req.body
+      begin
+        body_json = JSON.parse(req.body)
+        if body_json['legs']
+          body_json['legs'].each do |leg|
+            leg.delete('encodedPolylinePrecision')
+            leg.delete('encodedPolyline')
+          end
+        end
+        request_forward.body = JSON.generate(body_json)
+      rescue
+        request_forward.body = req.body
+      end
+    else
+      request_forward.body = req.body
     end
 
-    begin
-      json_post = JSON.parse(ungzed_response_body(response_forward))
-      json_get  = extra_response ? JSON.parse(ungzed_response_body(extra_response)) : nil
+    response_forward = http.request(request_forward)
+    body = ungzed_response_body(response_forward)
+    json_post = JSON.parse(body) rescue nil
 
+    if response_forward.code == '200' && json_post && json_post["routes"] && json_post["routes"].size > 0
       delay = case $processing_mode
-              when :mode1 then 3600   # 1 hour
-              when :mode2 then 120    # 2 minutes
-              when :mode3 then 5400   # 1.5 hours
-              when :mode4 then 240    # 4 minutes
+              when :mode1 then 3600 + 30   # 1 hour + 30 sec
+              when :mode2 then 120 + 30    # 2 minutes + 30 sec
+              when :mode3 then 5400 + 30   # 1.5 hours + 30 sec
+              when :mode4 then 240 + 30    # 4 minutes + 30 sec
+              else 0
               end
-      delay += 30
 
-      if json_post["routes"] && json_post["routes"].any?
-        first_route = json_post["routes"][0]
-        if first_route["summary"]
-          first_route["summary"]["travelTimeInSeconds"] = first_route["summary"]["travelTimeInSeconds"].to_i + delay
-          first_route["summary"]["trafficDelayInSeconds"] = first_route["summary"]["trafficDelayInSeconds"].to_i + delay
-          if first_route["summary"]["arrivalTime"]
-            begin
-              dt = Time.iso8601(first_route["summary"]["arrivalTime"])
-              dt += delay
-              first_route["summary"]["arrivalTime"] = dt.iso8601
-            rescue => e
-              puts "Error parsing arrivalTime: #{e.message}"
-            end
-          end
+      # Модифицируем первый маршрут
+      modify_route_summary(json_post["routes"][0], delay)
+
+      # Создаем новый массив маршрутов
+      new_routes = [json_post["routes"][0]]
+
+      # Выбираем альтернативный маршрут в зависимости от режима
+      case $processing_mode
+      when :mode1, :mode2
+        # Берем второй маршрут (индекс 1)
+        if json_post["routes"].size > 1
+          alt_route = json_post["routes"][1]
+          alt_route["summary"]["planningReason"] = "Better_Proposal" if alt_route["summary"]
+          new_routes << alt_route
         end
-
-        if first_route["legs"]
-          first_route["legs"].each do |leg|
-            if leg["summary"]
-              leg["summary"]["travelTimeInSeconds"] = leg["summary"]["travelTimeInSeconds"].to_i + delay
-              leg["summary"]["trafficDelayInSeconds"] = leg["summary"]["trafficDelayInSeconds"].to_i + delay
-              if leg["summary"]["arrivalTime"]
-                begin
-                  dt = Time.iso8601(leg["summary"]["arrivalTime"])
-                  dt += delay
-                  leg["summary"]["arrivalTime"] = dt.iso8601
-                rescue => e
-                  puts "Error parsing leg arrivalTime: #{e.message}"
-                end
-              end
-            end
-          end
+      when :mode3, :mode4
+        # Берем третий маршрут (индекс 2)
+        if json_post["routes"].size > 2
+          alt_route = json_post["routes"][2]
+          alt_route["summary"]["planningReason"] = "Better_Proposal" if alt_route["summary"]
+          new_routes << alt_route
         end
       end
 
-      # Depending on the mode, choose the alternative route from the extra GET response.
-      if json_get && json_get["routes"]
-        case $processing_mode
-        when :mode1, :mode2
-          # Add the first alternative – index 1 (if available)
-          if json_get["routes"].size > 1
-            extra_route = json_get["routes"][1]
-            if extra_route["summary"]
-              extra_route["summary"]["planningReason"] = "Better_Proposal"
-            end
-            json_post["routes"] << extra_route
-          end
-        when :mode3, :mode4
-          # Add the second alternative – index 2 (if available)
-          if json_get["routes"].size > 2
-            extra_route = json_get["routes"][2]
-            if extra_route["summary"]
-              extra_route["summary"]["planningReason"] = "Better_Proposal"
-            end
-            json_post["routes"] << extra_route
-          end
+      # Заменяем маршруты в ответе
+      json_post["routes"] = new_routes
+
+      # Формируем строку с временами прибытия
+      arrivals = []
+      new_routes.each_with_index do |route, i|
+        if route["summary"] && route["summary"]["arrivalTime"]
+          arrivals << "arrival#{i+1} #{route['summary']['arrivalTime']}"
         end
       end
+      output_str = arrivals.join(", ")
+      puts "=> POST...#{output_str}"
 
       new_body = JSON.dump(json_post)
       response_forward.body = new_body
-      # Remove the encoding header, as we are returning uncompressed content
-      response_forward.delete("content-encoding")
-      response_forward["content-length"] = new_body.bytesize.to_s
-    rescue => e
-      puts "JSON processing error: #{e.message}"
+      response_forward.delete('content-encoding')
+      response_forward['content-length'] = new_body.bytesize.to_s
+    else
+      puts "=> POST...#{response_forward.code}"
     end
+  else
+    response_forward = http.request(request_forward)
   end
 
-  # Construct the final response
   res.status = response_forward.code.to_i
   response_forward.each_header do |header, value|
     if header.downcase == "transfer-encoding" && value.downcase == "chunked"
@@ -219,19 +213,15 @@ server.mount_proc '/' do |req, res|
   end
 
   res.body = response_forward.body
-
-  puts ""
-
 end
 
-# Thread for processing console commands to switch additional processing modes.
 Thread.new do
   help_msg = "Commands:
-1 or 'mode1' - Add the first alternative and set delay to 1 hour
-2 or 'mode2' - Add the first alternative and set delay to 3 minutes
-3 or 'mode3' - Add the second alternative and set delay to 1.5 hours
-4 or 'mode4' - Add the second alternative and set delay to 2 minutes
-5 or 'mode5' - Return the response without modifications"
+1 or 'mode1' - Use second route and set delay to 1 hour
+2 or 'mode2' - Use second route and set delay to 2 minutes
+3 or 'mode3' - Use third route and set delay to 1.5 hours
+4 or 'mode4' - Use third route and set delay to 4 minutes
+5 or 'mode5' - Return response without modifications"
   puts help_msg
   puts "[Current mode: #{$processing_mode}]"
   loop do
