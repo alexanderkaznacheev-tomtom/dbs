@@ -33,34 +33,50 @@ def clean_url(original_url)
   uri.to_s
 end
 
-def modify_route_summary(route, delay)
-  if route["summary"]
-    summary = route["summary"]
-    summary["travelTimeInSeconds"] = summary["travelTimeInSeconds"].to_i + delay
-    summary["trafficDelayInSeconds"] = summary["trafficDelayInSeconds"].to_i + delay
-    if summary["arrivalTime"]
-      begin
-        dt = Time.iso8601(summary["arrivalTime"])
-        dt += delay
-        summary["arrivalTime"] = dt.iso8601
-      rescue
-      end
+def modify_route_summary(route, alt_route, delay)
+  return unless route["summary"] && alt_route["summary"]
+  
+  # Update top-level summary from alternative route
+  alt_summary = alt_route["summary"]
+  summary = route["summary"]
+  
+  summary["travelTimeInSeconds"] = alt_summary["travelTimeInSeconds"].to_i + delay
+  summary["trafficDelayInSeconds"] = alt_summary["trafficDelayInSeconds"].to_i + delay
+  
+  if alt_summary["arrivalTime"]
+    begin
+      dt = Time.iso8601(alt_summary["arrivalTime"])
+      dt += delay
+      summary["arrivalTime"] = dt.iso8601
+    rescue
+      # Keep original if parsing fails
     end
   end
 
-  if route["legs"]
-    route["legs"].each do |leg|
-      if leg["summary"]
-        leg_summary = leg["summary"]
-        leg_summary["travelTimeInSeconds"] = leg_summary["travelTimeInSeconds"].to_i + delay
-        leg_summary["trafficDelayInSeconds"] = leg_summary["trafficDelayInSeconds"].to_i + delay
-        if leg_summary["arrivalTime"]
-          begin
-            dt = Time.iso8601(leg_summary["arrivalTime"])
-            dt += delay
-            leg_summary["arrivalTime"] = dt.iso8601
-          rescue
-          end
+  # Update each leg's summary from corresponding alternative leg
+  if route["legs"] && alt_route["legs"]
+    # Process up to the minimum number of legs
+    min_legs = [route["legs"].size, alt_route["legs"].size].min
+    
+    min_legs.times do |i|
+      leg = route["legs"][i]
+      alt_leg = alt_route["legs"][i]
+      
+      next unless leg["summary"] && alt_leg["summary"]
+      
+      leg_summary = leg["summary"]
+      alt_leg_summary = alt_leg["summary"]
+      
+      leg_summary["travelTimeInSeconds"] = alt_leg_summary["travelTimeInSeconds"].to_i + delay
+      leg_summary["trafficDelayInSeconds"] = alt_leg_summary["trafficDelayInSeconds"].to_i + delay
+      
+      if alt_leg_summary["arrivalTime"]
+        begin
+          dt = Time.iso8601(alt_leg_summary["arrivalTime"])
+          dt += delay
+          leg_summary["arrivalTime"] = dt.iso8601
+        rescue
+          # Keep original if parsing fails
         end
       end
     end
@@ -156,23 +172,31 @@ server.mount_proc '/' do |req, res|
               else 0
               end
 
-      # Модифицируем первый маршрут
-      modify_route_summary(json_post["routes"][0], delay)
+      # Выбираем альтернативный маршрут в зависимости от режима
+      alt_route_index = case $processing_mode
+                        when :mode1, :mode2 then 1
+                        when :mode3, :mode4 then 2
+                        else 0
+                        end
+
+      # Модифицируем первый маршрут с использованием альтернативного
+      if json_post["routes"].size > alt_route_index
+        alt_route = json_post["routes"][alt_route_index]
+        modify_route_summary(json_post["routes"][0], alt_route, delay)
+      end
 
       # Создаем новый массив маршрутов
       new_routes = [json_post["routes"][0]]
 
-      # Выбираем альтернативный маршрут в зависимости от режима
+      # Добавляем альтернативный маршрут
       case $processing_mode
       when :mode1, :mode2
-        # Берем второй маршрут (индекс 1)
         if json_post["routes"].size > 1
           alt_route = json_post["routes"][1]
           alt_route["summary"]["planningReason"] = "Better_Proposal" if alt_route["summary"]
           new_routes << alt_route
         end
       when :mode3, :mode4
-        # Берем третий маршрут (индекс 2)
         if json_post["routes"].size > 2
           alt_route = json_post["routes"][2]
           alt_route["summary"]["planningReason"] = "Better_Proposal" if alt_route["summary"]
@@ -202,6 +226,7 @@ server.mount_proc '/' do |req, res|
     end
   else
     response_forward = http.request(request_forward)
+    puts "=> (unmodified)POST...#{response_forward.code}"
   end
 
   res.status = response_forward.code.to_i
@@ -225,7 +250,7 @@ Thread.new do
   puts help_msg
   puts "[Current mode: #{$processing_mode}]"
   loop do
-    puts "Enter command: "
+    print "Enter command: "
     input = gets.strip.downcase rescue nil
     if input.nil?
       sleep 1
