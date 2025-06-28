@@ -95,6 +95,60 @@ def ungzed_response_body(response)
   end
 end
 
+def log_request(req, target_url)
+  puts "=> REQUEST: #{req.request_method} #{target_url}"
+  
+  # Log request headers
+  puts "  Headers:"
+  req.header.each do |key, values|
+    puts "    #{key}: #{values.join(', ')}"
+  end
+  
+  # Log request body if present
+  if req.body && !req.body.empty?
+    puts "  Body:"
+    
+    if req['content-type']&.include?('application/json')
+      begin
+        json_body = JSON.parse(req.body)
+        pretty_json = JSON.pretty_generate(json_body)
+        puts pretty_json
+      rescue
+        puts req.body
+      end
+    else
+      puts req.body
+    end
+  else
+    puts "  No request body"
+  end
+end
+
+def log_response(response)
+  puts "  Response: #{response.code} #{response.message}"
+  
+  # Log response headers
+  puts "  Headers:"
+  response.each_header do |key, value|
+    puts "    #{key}: #{value}"
+  end
+  
+  # Log response body
+  body = ungzed_response_body(response)
+  puts "  Body:"
+  
+  if response['content-type']&.include?('application/json')
+    begin
+      json_body = JSON.parse(body)
+      puts JSON.pretty_generate(json_body)
+    rescue
+      puts body
+    end
+  else
+    puts body
+  end
+end
+
 server = WEBrick::HTTPServer.new(
   Port: PORT,
   Logger: WEBrick::Log.new(File::NULL, WEBrick::Log::FATAL),
@@ -225,24 +279,15 @@ server.mount_proc '/' do |req, res|
       puts "=> POST...#{response_forward.code}"
     end
   else
-    response_forward = http.request(request_forward)
-    puts "=> (unmodified)POST...#{response_forward.code}"
+    # Логируем запрос перед отправкой
+    log_request(req, target_url)
     
-    # Декодируем и выводим тело ответа если нужно
-    if response_forward.code == '200' && 
-       response_forward['content-type']&.include?('application/json')
-      
-      body = ungzed_response_body(response_forward)
-      
-      begin
-        json_body = JSON.parse(body)
-        pretty_json = JSON.pretty_generate(json_body)
-        puts "Response Body:"
-        puts pretty_json
-      rescue => e
-        puts "Failed to parse JSON: #{e}"
-      end
-    end
+    # Отправляем запрос
+    response_forward = http.request(request_forward)
+    
+    # Логируем ответ
+    puts "  => Unmodified POST response: #{response_forward.code}"
+    log_response(response_forward) if response_forward.code == "200"
   end
 
   res.status = response_forward.code.to_i
