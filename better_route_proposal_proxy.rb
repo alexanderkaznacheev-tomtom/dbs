@@ -287,7 +287,7 @@ server.mount_proc '/' do |req, res|
     
     # Log response
     puts "  => Unmodified POST response: #{response_forward.code}"
-    log_response(response_forward) if response_forward.code == "200"
+    # log_response(response_forward) if response_forward.code == "200"
   end
 
   res.status = response_forward.code.to_i
