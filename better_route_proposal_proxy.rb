@@ -18,16 +18,16 @@ def clean_url(original_url)
   if uri.query
     params = CGI.parse(uri.query)
     
-    # Удаляем ненужные параметры
+    # Remove unnecessary parameters
     params.delete('alternativeType')
     params.delete('minDeviationTime')
     params.delete('reconstructionMode')
     params.delete('supportingPointIndexOfOrigin')
     
-    # Запрашиваем 2 альтернативных маршрута (итого 3 маршрута)
+    # Request 2 alternative routes (3 routes total)
     params['maxAlternatives'] = ['2']
     
-    # Перестраиваем строку запроса
+    # Rebuild query string
     uri.query = URI.encode_www_form(params)
   end
   uri.to_s
@@ -195,7 +195,7 @@ server.mount_proc '/' do |req, res|
       end
     end
 
-    # Модифицируем тело запроса
+    # Modify request body
     if req['content-type']&.include?('application/json') && req.body
       begin
         body_json = JSON.parse(req.body)
@@ -226,23 +226,23 @@ server.mount_proc '/' do |req, res|
               else 0
               end
 
-      # Выбираем альтернативный маршрут в зависимости от режима
+      # Select alternative route based on mode
       alt_route_index = case $processing_mode
                         when :mode1, :mode2 then 1
                         when :mode3, :mode4 then 2
                         else 0
                         end
 
-      # Модифицируем первый маршрут с использованием альтернативного
+      # Modify first route using alternative route
       if json_post["routes"].size > alt_route_index
         alt_route = json_post["routes"][alt_route_index]
         modify_route_summary(json_post["routes"][0], alt_route, delay)
       end
 
-      # Создаем новый массив маршрутов
+      # Create new route array
       new_routes = [json_post["routes"][0]]
 
-      # Добавляем альтернативный маршрут
+      # Add alternative route
       case $processing_mode
       when :mode1, :mode2
         if json_post["routes"].size > 1
@@ -258,10 +258,10 @@ server.mount_proc '/' do |req, res|
         end
       end
 
-      # Заменяем маршруты в ответе
+      # Replace routes in response
       json_post["routes"] = new_routes
 
-      # Формируем строку с временами прибытия
+      # Format arrival times string
       arrivals = []
       new_routes.each_with_index do |route, i|
         if route["summary"] && route["summary"]["arrivalTime"]
@@ -279,13 +279,13 @@ server.mount_proc '/' do |req, res|
       puts "=> POST...#{response_forward.code}"
     end
   else
-    # Логируем запрос перед отправкой
+    # Log request before sending
     log_request(req, target_url)
     
-    # Отправляем запрос
+    # Send request
     response_forward = http.request(request_forward)
     
-    # Логируем ответ
+    # Log response
     puts "  => Unmodified POST response: #{response_forward.code}"
     log_response(response_forward) if response_forward.code == "200"
   end
@@ -303,11 +303,11 @@ end
 
 Thread.new do
   help_msg = "Commands:
-1 or 'mode1' - Use second route and set delay to 1 hour
-2 or 'mode2' - Use second route and set delay to 2 minutes
-3 or 'mode3' - Use third route and set delay to 1.5 hours
-4 or 'mode4' - Use third route and set delay to 4 minutes
-5 or 'mode5' - Return response without modifications"
+1 or 'mode1' - Use second route with 1 hour delay
+2 or 'mode2' - Use second route with 2 minute delay
+3 or 'mode3' - Use third route with 1.5 hour delay
+4 or 'mode4' - Use third route with 4 minute delay
+5 or 'mode5' - Return original response"
   puts help_msg
   puts "[Current mode: #{$processing_mode}]"
   loop do
